@@ -1,0 +1,130 @@
+---
+title: "Surface Spline"
+author: "He Junhui"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(EBARS)
+library(plot3D)
+```
+
++ Case I
+```{r}
+set.seed(1234)
+```
+
+```{r}
+# generate training data
+m_train = 1000
+x_train = cbind(c(-1,runif(m_train-2,-1,1),1),c(-1,runif(m_train-2,-1,1),1))
+y_train = exp(-(x_train[,1]^2+x_train[,2]^2)*20)
+y_obs = y_train + rnorm(m_train,0,0.1)
+```
+
+
+```{r}
+# generate test set
+m_test = 200
+x_new = cbind(runif(m_test,-1,1),runif(m_test,-1,1))
+y_new = exp(-(x_new[,1]^2+x_new[,2]^2)*20)
+```
+
+```{r}
+# run suface EBARS
+time_start = Sys.time()
+my_binebars = binebars(x_train, y_obs)
+my_binebars$mcmc()
+time_end = Sys.time()
+time_end - time_start
+```
+
+```{r}
+my_binebars$knots()
+```
+
+```{r}
+y_hat = my_binebars$predict(x_new)
+sum((y_new-y_hat)^2)/m_test
+```
+
+```{r}
+# kernel smooth method
+library(sm)
+sm = sm.regression(x_train,y_obs,method="cv",eval.points=x_new,eval.grid=FALSE)
+sum((y_new-sm$estimate)^2)/m_test
+```
+
+```{r}
+# local polynomial regression method
+df = data.frame(x=x_train[,1],y=x_train[,2],z=y_obs)
+locpm = loess(z~x*y,data=df,degree=2,span=0.15)
+#control = loess.control(surface = "direct")
+y_locpm = predict(locpm,x_new)
+sum((y_new-y_locpm)^2)/m_test
+```
+
+```{r}
+grid = seq(-1,1,by=0.01)
+m = length(grid)
+x = cbind(rep(grid,each=m), rep(grid,times=m))
+y = exp(-(x[,1]^2+x[,2]^2)*20)
+```
+
+
+```{r}
+scatter3D(x[,1], x[,2], y,
+          theta = 20, phi = 20,
+          pch = 20, box=TRUE, cex = 0.4, colkey = FALSE, 
+          border="black", shade=0.8, 
+          bty = "g", ticktype = "detailed",
+          main="Surface Case")
+```
+
+```{r}
+y_hat = my_binebars$predict(x)
+sum((y-y_hat)^2)/m^2
+```
+
+```{r}
+scatter3D(x[,1], x[,2], y_hat,
+          theta = 20, phi = 20,
+          pch = 20, box=TRUE, cex = 0.4, colkey = FALSE, 
+          border="black", shade=0.8, 
+          bty = "g", ticktype = "detailed",
+          main="Surface Spline")
+```
+
+```{r}
+sm = sm.regression(x_train,y_obs,method="cv",eval.points=x,eval.grid=FALSE)
+sum((y-sm$estimate)^2)/m^2
+```
+
+```{r}
+scatter3D(x[,1], x[,2], sm$estimate,
+          theta = 20, phi = 20,
+          pch = 20, box=TRUE, cex = 0.4, colkey = FALSE, 
+          border="black", shade=0.8, 
+          bty = "g", ticktype = "detailed",
+          main="Surface Kernel")
+```
+
+```{r}
+# local polynomial regression method
+y_locpm = predict(locpm,x)
+sum((y-y_locpm)^2)/m^2
+```
+
+```{r}
+scatter3D(x[,1], x[,2], y_locpm,
+          theta = 20, phi = 20,
+          pch = 20, box=TRUE, cex = 0.4, colkey = FALSE, 
+          border="black", shade=0.8, 
+          bty = "g", ticktype = "detailed",
+          main="Surface Polynomial")
+```

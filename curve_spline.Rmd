@@ -1,0 +1,105 @@
+---
+title: "Curve Spline"
+author: "He Junhui"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(EBARS)
+library(splines)
+library(ggplot2)
+library(sm)
+```
+
+
+```{r}
+set.seed(1234)
+```
+
+```{r}
+knot = c(0.4,0.4,0.4,0.4,0.7)
+beta = matrix(c(3,-5,5,-3,3,-5,3,-2),ncol=1)
+m_train = 500; m_test = 200
+```
+
+```{r}
+# generate train data set
+x_train = c(0,sort(runif(m_train, 0, 1))[c(-1,-m_train)],1)
+B = bs(x_train,knots=knot,Boundary.knots=c(0,1))
+y_train = B%*%beta*10
+y_obs = y_train + rnorm(m_train,0,1)
+
+# generate test data set
+x_new = runif(m_test,0,1)
+y_new = predict(B,x_new)%*%beta*10
+```
+
+```{r}
+ggplot() + geom_point(aes(x_train,y_obs)) + xlab("") + ylab("")
+```
+
+```{r}
+time_start = Sys.time()
+my_ebars = ebars(x_train,y_obs)
+my_ebars$mcmc()
+time_end = Sys.time()
+print(time_end-time_start)
+```
+
+```{r}
+my_ebars$knots()
+```
+
+
+```{r}
+y_hat = my_ebars$predict(x_new)
+err = y_hat - y_new
+p = 0.025; m_win = round(m_test*p)
+err_win = sort(abs(err))[(m_win+1):(m_test-m_win)]
+sum((err_win)^2)/length(err_win)
+```
+
+```{r}
+ggplot() + geom_point(aes(x_new,y_hat),color="red") + 
+  ggtitle("EBARS") + xlab("") + ylab("") + theme(plot.title = element_text(hjust=0.5))
+```
+
+```{r,include=FALSE}
+sm = sm.regression(x_train,y_obs,method="cv",eval.points=x_new,eval.grid=FALSE)
+```
+
+```{r}
+err = sm$estimate - y_new
+p = 0.025; m_win = round(m_test*p)
+err_win = sort(abs(err))[(m_win+1):(m_test-m_win)]
+sum((err_win)^2)/length(err_win)
+```
+
+```{r}
+ggplot() + geom_point(aes(x_new,sm$estimate),color="red") + 
+  ggtitle("Kernel Smooth") + xlab("") + ylab("") + theme(plot.title = element_text(hjust=0.5))
+```
+
+```{r}
+# local polynomial regression method
+df = data.frame(x=x_train,y=y_obs)
+locpm = loess(y~x,data=df,degree=2,span=0.15)
+y_locpm = predict(locpm,x_new)
+```
+
+```{r}
+err = y_locpm - y_new
+p = 0.025; m_win = round(m_test*p)
+err_win = sort(abs(err))[(m_win+1):(m_test-m_win)]
+sum((err_win)^2)/length(err_win)
+```
+
+```{r}
+ggplot() + geom_point(aes(x_new,y_locpm),color="red") + 
+  ggtitle("Local Polynomial") + xlab("") + ylab("") + theme(plot.title = element_text(hjust=0.5))
+```

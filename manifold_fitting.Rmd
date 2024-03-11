@@ -1,0 +1,161 @@
+---
+title: "Manifold Fitting"
+author: "He Junhui"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(EBARS)
+library(plot3D)
+```
+
++ Spiral in R^2
+```{r}
+set.seed(1234)
+```
+
+```{r}
+I = 1000
+theta = seq(0, 6*pi, length.out=I)
+x = cbind(2*(theta+4)^(0.7)*cos(theta), 2*(theta+4)^(0.7)*sin(theta))
+
+sd = 0.25
+xobs = x + cbind(rnorm(I,0,sd), rnorm(I,0,sd))
+```
+
+```{r}
+plot(xobs[,1], xobs[,2],
+     pch=20, col="grey",
+     main="Spiral Case in R^2",
+     xlab=" ", ylab=" ")
+```
+```{r}
+time.start = Sys.time()
+result = manifold_fitting(xobs, d=1)
+time.end = Sys.time()
+```
+
+```{r}
+print(time.end-time.start)
+```
+
+```{r}
+center = (result$lower+result$upper)/2
+radius = abs(result$upper-result$lower)/2
+I.test = 1000
+x.test = result$map(seq(center-radius*0.99,center+radius*0.99,length.out=I.test))
+```
+
+```{r}
+plot(xobs[,1], xobs[,2],
+     pch=20, col="grey",
+     main="Principal Manifold Estimation",
+     xlab=" ", ylab=" ")
+lines(x.test[,1],x.test[,2],col="black",type = "l",lwd=3)
+```
+
+
+
++ space spiral in R^3
+```{r}
+set.seed(1234)
+```
+
+```{r}
+I = 1000
+theta = seq(0, 6*pi, length.out=I)
+x = cbind(2*(theta+4)^(0.7)*cos(theta), 2*(theta+4)^(0.7)*sin(theta), 2*(theta+4)^(0.7))
+
+sd = 0.3
+xobs = x + cbind(rnorm(I,0,sd), rnorm(I,0,sd), rnorm(I,0,sd))
+```
+
+```{r}
+scatter3D(xobs[,1], xobs[,2], xobs[,3],
+          theta = 15, phi = 30,
+          pch = 20, box=TRUE, cex = 0.2, colkey = FALSE, 
+          border="black", shade=0.8, 
+          bty = "g", ticktype = "detailed",
+          main="Space Spiral Case")
+```
+
+```{r}
+time.start = Sys.time()
+result = manifold_fitting(xobs, d=1)
+time.end = Sys.time()
+```
+
+```{r}
+print(time.end-time.start)
+```
+
+```{r}
+center = (result$lower+result$upper)/2
+radius = abs(result$upper-result$lower)/2
+I.test = 1000
+x.test = result$map(seq(center-radius*0.99,center+radius*0.99,length.out=I.test))
+```
+
+```{r}
+scatter3D(xobs[,1], xobs[,2], xobs[,3],
+          theta = 15, phi = 30,
+          pch = 20, box=TRUE, cex = 0.2, colkey = FALSE, 
+          border="black", shade=0.8, 
+          bty = "g", ticktype = "detailed",
+          main="Principal Manifold Estimation")
+scatter3D(x.test[,1], x.test[,2],x.test[,3], 
+          pch = 20, box=TRUE, cex = 0.2, colkey = FALSE, col = "black", 
+          border="black", shade=0.8, main=" ",add = TRUE)
+```
+
++ Sine curve
+
+```{r}
+set.seed(1234)
+```
+
+```{r}
+I = 1000
+theta = runif(I,0,6*pi)
+x = cbind(theta,sin(theta))
+
+sd = 0.15
+xobs = x + cbind(rnorm(I,0,sd), rnorm(I,0,sd))
+```
+
+```{r}
+plot(xobs[,1], xobs[,2],
+     pch=20, col="grey",
+     main="Sine case",
+     xlab=" ", ylab=" ")
+```
+
+```{r}
+time.start = Sys.time()
+result = manifold_fitting(xobs, d=1)
+time.end = Sys.time()
+```
+
+```{r}
+print(time.end-time.start)
+```
+
+```{r}
+center = (result$lower+result$upper)/2
+radius = abs(result$upper-result$lower)/2
+I.test = 1000
+x.test = result$map(seq(center-radius*0.99,center+radius*0.99,length.out=I.test))
+```
+
+```{r}
+plot(xobs[,1], xobs[,2],
+     pch=20, col="grey",
+     main="Principal Manifold Estimation",
+     xlab=" ", ylab=" ")
+lines(x.test[,1],x.test[,2],col="black",type = "l",lwd=3)
+```
