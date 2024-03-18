@@ -12,8 +12,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(EBARS)
 library(splines)
-library(ggplot2)
-library(ggpubr)
 source("bars.R")
 ```
 
