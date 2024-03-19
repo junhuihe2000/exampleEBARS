@@ -5,13 +5,13 @@ LSE<-function(X,Y,tau0,tol=1e-6,max.iter=1000)
   erro = FALSE;count = 1;Test.0=TRUE
   while (Test.0)
   {
-    ### Step1: fix the change-points and estimate other coefficients ###
+    ### update_step1: fix the change-points and estimate other coefficients ###
     X_tau = sapply(tau0,function(tau) {return(as.numeric(X>tau)*(X-tau))})
     lin.inital <- lm(Y~ cbind(X,X_tau)) #fit a linear regression
     theta0 = c(as.numeric(coef(lin.inital)),tau0)
     y_pred0 = predict(lin.inital)
 
-    ### Step2: update change-points via a modified NR procedure ###
+    ### update_step2: update change-points via a modified NR procedure ###
     I_tau = sapply(tau0,function(tau) {return(as.numeric(X>tau))})
     sig_error = Y-y_pred0
     ### Calculate U and J ###
@@ -25,21 +25,23 @@ LSE<-function(X,Y,tau0,tol=1e-6,max.iter=1000)
         Jn[i,j] = -theta0[i+2]*theta0[j+2]*mean(I_tau[,i]*I_tau[,j])
       }
     }
-    ### Calculate the Step ###
-    tryCatch( {step = solve(Jn)%*%Un},error=function(cond) erro = TRUE)
+    ### Calculate the update_step ###
+    tryCatch( {update_step = solve(Jn)%*%Un},error=function(cond) erro = TRUE)
     ### Update Tau ###
-    if (erro == FALSE & !any(is.na(step)))
-    { tau0 = tau0 + step}
+    if (erro == FALSE & !any(is.na(update_step)))
+    {tau0 = tau0 + update_step}
     count=count+1
 
-    Test.0=any(abs(step) > tol) & count<=max.iter & erro==FALSE #count: number of iterations
+    Test.0=any(abs(update_step) > tol) & count<=max.iter & erro==FALSE #count: number of iterations
     if (is.na(Test.0)){Test.0=FALSE}#whether the algorithm is running properly
   }
 
+  if(FALSE) {
   tau.out = rep(NA,n_knots)
   Test = (erro == FALSE & max(tau0,na.rm=T)<max(X) & min(tau0,na.rm=T)>min(X))
-  if (Test & (count<=max.iter| (count==(max.iter+1) & all(abs(step) <= sqrt(tol)))))
+  if (Test & (count<=max.iter| (count==(max.iter+1) & all(abs(update_step) <= sqrt(tol)))))
   {tau.out = c(tau0)}
+  }
 
-  return(tau.out)
+  return(tau0)
 }
