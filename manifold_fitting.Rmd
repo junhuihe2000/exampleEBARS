@@ -12,53 +12,64 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(EBARS)
 library(plot3D)
+library(ggplot2)
+source("Principal_Manifold_Estimation.R")
 ```
 
+## Curve Fitting
 + Spiral in R^2
 ```{r}
 set.seed(1234)
 ```
 
 ```{r}
-I = 1000
+I = 1000; I.test = 1000
 theta = seq(0, 6*pi, length.out=I)
 x = cbind(2*(theta+4)^(0.7)*cos(theta), 2*(theta+4)^(0.7)*sin(theta))
 
-sd = 0.25
+sd = 0.3
 xobs = x + cbind(rnorm(I,0,sd), rnorm(I,0,sd))
 ```
 
 ```{r}
-plot(xobs[,1], xobs[,2],
-     pch=20, col="grey",
-     main="Spiral Case in R^2",
-     xlab=" ", ylab=" ")
-```
-```{r}
-time.start = Sys.time()
-result = manifold_fitting(xobs, d=1)
-time.end = Sys.time()
+ggplot() + geom_point(aes(xobs[,1],xobs[,2]),size=0.6,col="red") +
+  theme(axis.title.x=element_blank(),axis.title.y=element_blank())
 ```
 
 ```{r}
+# EBARS
+time.start = Sys.time()
+result.ebars = manifold_fitting(xobs, d=1)
+time.end = Sys.time()
 print(time.end-time.start)
 ```
 
 ```{r}
-center = (result$lower+result$upper)/2
-radius = abs(result$upper-result$lower)/2
-I.test = 1000
-x.test = result$map(seq(center-radius*0.99,center+radius*0.99,length.out=I.test))
+center = (result.ebars$lower+result.ebars$upper)/2
+radius = abs(result.ebars$upper-result.ebars$lower)/2
+x.ebars = result.ebars$map(seq(center-radius*0.99,center+radius*0.99,length.out=I.test))
+ggplot() + geom_path(aes(x.ebars[,1],x.ebars[,2])) +
+  theme(axis.title.x=element_blank(),axis.title.y=element_blank())
+```
+
+```{r,include=FALSE}
+# Principal Manifold Estimation
+time.start = Sys.time()
+result.pme = PME(xobs,d=1,print.MSDs = F)
+time.end = Sys.time()
 ```
 
 ```{r}
-plot(xobs[,1], xobs[,2],
-     pch=20, col="grey",
-     main="Principal Manifold Estimation",
-     xlab=" ", ylab=" ")
-lines(x.test[,1],x.test[,2],col="black",type = "l",lwd=3)
+print(time.end - time.start)
 ```
 
+
+```{r}
+t.pme = seq(-100,100,length.out=I.test)
+x.pme = t(sapply(t.pme,function(t) {return(result.pme$embedding.map(t))}))
+ggplot() + geom_path(aes(x.pme[,1],x.pme[,2])) + xlim(range(xobs[,1])) + ylim(range(xobs[,2])) +
+  theme(axis.title.x=element_blank(),axis.title.y=element_blank())
+```
 
 
 + space spiral in R^3
@@ -67,9 +78,9 @@ set.seed(1234)
 ```
 
 ```{r}
-I = 1000
+I = 1000; I.test = 1000
 theta = seq(0, 6*pi, length.out=I)
-x = cbind(2*(theta+4)^(0.7)*cos(theta), 2*(theta+4)^(0.7)*sin(theta), 2*(theta+4)^(0.7))
+x = cbind(2*(theta+4)^(0.7)*cos(theta), 2*(theta+4)^(0.7)*sin(theta), -2*(theta+4)^(0.7))
 
 sd = 0.3
 xobs = x + cbind(rnorm(I,0,sd), rnorm(I,0,sd), rnorm(I,0,sd))
@@ -81,63 +92,36 @@ scatter3D(xobs[,1], xobs[,2], xobs[,3],
           pch = 20, box=TRUE, cex = 0.2, colkey = FALSE, 
           border="black", shade=0.8, 
           bty = "g", ticktype = "detailed",
-          main="Space Spiral Case")
+          main="")
 ```
 
 ```{r}
+# EBARS
 time.start = Sys.time()
-result = manifold_fitting(xobs, d=1)
+result.ebars = manifold_fitting(xobs, d=1)
 time.end = Sys.time()
-```
-
-```{r}
 print(time.end-time.start)
 ```
 
 ```{r}
-center = (result$lower+result$upper)/2
-radius = abs(result$upper-result$lower)/2
-I.test = 1000
-x.test = result$map(seq(center-radius*0.99,center+radius*0.99,length.out=I.test))
+center = (result.ebars$lower+result.ebars$upper)/2
+radius = abs(result.ebars$upper-result.ebars$lower)/2
+x.ebars = result.ebars$map(seq(center-radius*0.99,center+radius*0.99,length.out=I.test))
 ```
 
 ```{r}
-scatter3D(xobs[,1], xobs[,2], xobs[,3],
-          theta = 15, phi = 30,
+scatter3D(x.ebars[,1], x.ebars[,2], x.ebars[,3],
+          theta = 15, phi = 30, col = "black",
           pch = 20, box=TRUE, cex = 0.2, colkey = FALSE, 
           border="black", shade=0.8, 
           bty = "g", ticktype = "detailed",
-          main="Principal Manifold Estimation")
-scatter3D(x.test[,1], x.test[,2],x.test[,3], 
-          pch = 20, box=TRUE, cex = 0.2, colkey = FALSE, col = "black", 
-          border="black", shade=0.8, main=" ",add = TRUE)
+          main="")
 ```
 
-+ Sine curve
-
-```{r}
-set.seed(1234)
-```
-
-```{r}
-I = 1000
-theta = runif(I,0,6*pi)
-x = cbind(theta,sin(theta))
-
-sd = 0.15
-xobs = x + cbind(rnorm(I,0,sd), rnorm(I,0,sd))
-```
-
-```{r}
-plot(xobs[,1], xobs[,2],
-     pch=20, col="grey",
-     main="Sine case",
-     xlab=" ", ylab=" ")
-```
-
-```{r}
+```{r,include=FALSE}
+# Principal Manifold Estimation
 time.start = Sys.time()
-result = manifold_fitting(xobs, d=1)
+result.pme = PME(xobs, d=1)
 time.end = Sys.time()
 ```
 
@@ -146,16 +130,27 @@ print(time.end-time.start)
 ```
 
 ```{r}
-center = (result$lower+result$upper)/2
-radius = abs(result$upper-result$lower)/2
-I.test = 1000
-x.test = result$map(seq(center-radius*0.99,center+radius*0.99,length.out=I.test))
+t.pme = seq(-100,100,length.out=I.test)
+x.pme = t(sapply(t.pme,function(t) {return(result.pme$embedding.map(t))}))
 ```
 
 ```{r}
-plot(xobs[,1], xobs[,2],
-     pch=20, col="grey",
-     main="Principal Manifold Estimation",
-     xlab=" ", ylab=" ")
-lines(x.test[,1],x.test[,2],col="black",type = "l",lwd=3)
+scatter3D(x.pme[,1], x.pme[,2], x.pme[,3],
+          theta = 15, phi = 30, col = "black",
+          pch = 20, box=TRUE, cex = 0.2, colkey = FALSE, 
+          border="black", shade=0.8, 
+          bty = "g", ticktype = "detailed",
+          main="")
 ```
+
+## Surface Fitting
++ Swiss Roll 
+```{r}
+I = 1000; I.test = 1000
+theta = 1.5*pi*(1+2*runif(I))
+x_2 = 21*runif(I)
+x_1 = theta*cos(theta)
+x_3 = theta*sin(theta)
+x = cbind(x_1,x_2,x_3)
+```
+

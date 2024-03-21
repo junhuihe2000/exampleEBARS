@@ -40,7 +40,6 @@ f4 = function(x) {
 
 
 ```{r}
-graphs = list("Case 1"=list(), "Case 2" = list(), "Case 3" = list(), "Case 4" = list())
 noises = c(2,2,4,1)
 fs = list(f1,f2,f3,f4)
 ```
