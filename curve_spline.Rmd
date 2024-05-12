@@ -15,6 +15,11 @@ library(splines)
 library(ggplot2)
 ```
 
+```{r}
+p = ggplot() + geom_point(aes(x_train,y_obs),size=0.6,col="red") + geom_line(aes(x_train,y_train)) + theme(axis.title.x=element_blank(),axis.title.y=element_blank())
+ggsave(filename = file.path("plots","spline_regression.pdf"), p, height = 4)
+```
+
 
 ```{r}
 p = 0.025 # censored threshold

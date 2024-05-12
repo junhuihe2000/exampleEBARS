@@ -29,7 +29,7 @@ set.seed(1234)
 I = 1000; I.test = 1000
 theta = seq(0, 6*pi, length.out=I)
 x = cbind(2*(theta+4)^(0.7)*cos(theta), 2*(theta+4)^(0.7)*sin(theta))
-sd = 0.3
+sd = 0.35
 xobs = x + cbind(rnorm(I,0,sd), rnorm(I,0,sd))
 plot(xobs[,1],xobs[,2],col="red",xlab="",ylab="",pch=16,cex=0.5)
 # EBARS
@@ -48,7 +48,7 @@ plot(x.pme[,1],x.pme[,2],type="l",xlab="",ylab="",xlim=range(xobs[,1]),ylim=rang
 I = 1000; I.test = 1000
 theta = seq(0, 6*pi, length.out=I)
 x = cbind(2*(theta+4)^(0.7)*cos(theta), 2*(theta+4)^(0.7)*sin(theta), -2*(theta+4)^(0.7))
-sd = 0.3
+sd = 0.4
 xobs = x + cbind(rnorm(I,0,sd), rnorm(I,0,sd), rnorm(I,0,sd))
 scatter3D(xobs[,1], xobs[,2], xobs[,3],
           theta = 20, phi = 30,
@@ -99,7 +99,7 @@ scatter3D(xobs[,1], xobs[,2], xobs[,3],
 result.ebars = manifold_fitting(xobs, d=2)
 center = (result.ebars$lower+result.ebars$upper)/2
 radius = abs(result.ebars$upper-result.ebars$lower)/2
-t.ebars = cbind(runif(I.test,center[1]-radius[1]*0.99,center[1]+radius[1]*0.99),runif(I.test,center[2]-radius[2]*0.5,center[2]+radius[2]*0.5))
+t.ebars = cbind(runif(I.test,center[1]-radius[1]*0.99,center[1]+radius[1]*0.99),runif(I.test,center[2]-radius[2]*0.6,center[2]+radius[2]*0.6))
 x.ebars = result.ebars$map(t.ebars)
 scatter3D(x.ebars[,1], x.ebars[,2], x.ebars[,3],
           theta = 20, phi = 15, colvar = t.ebars[,1], 
@@ -110,7 +110,7 @@ scatter3D(x.ebars[,1], x.ebars[,2], x.ebars[,3],
           main="")
 # PME
 result.pme = PME(xobs, d=2, print.MSDs = F)
-t.pme = cbind(runif(I.test,-50,50),runif(I.test,-50,50))
+t.pme = cbind(runif(I.test,-10,10),runif(I.test,-10,10))
 x.pme = t(sapply(1:I.test,function(i) {return(result.pme$embedding.map(t.pme[i,]))}))
 scatter3D(x.pme[,1], x.pme[,2], x.pme[,3],
           theta = 20, phi = 15, colvar = t.pme[,1],
