@@ -1,0 +1,25 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# exampleEBARS
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The exampleEBARS consists of all R codes for numerical experiments in the article ***Extended Bayesian information criterion for multivariate spline knot inference***. The source package can be found in [EBARS](https://github.com/junhuihe2000/EBARS). We implement the applications of the proposed method in knot inference, manifold denoising and function fitting.
+
+## Overview
+
+1. `knot_inference` includes simulations and figures of knot inference in linear spline models with one, two and four knots.
+2. `manifold` includes datasets, simulations, output and figures of manifold denoising in three scenarios of arcs, spiral curve and Swiss roll. 
+3. `fitting` includes the prediction performance in curve and surface fitting with jumping discontinuity.
