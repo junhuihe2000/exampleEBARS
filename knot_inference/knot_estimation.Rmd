@@ -16,7 +16,7 @@ library(segmented)
 library(ggplot2)
 library(ggpubr)
 library(grid)
-source("G:/HeJunhui/research/2023/exampleEBARS/exampleEBARS/bars.R")
+# source("G:/HeJunhui/research/2023/exampleEBARS/exampleEBARS/bars.R")
 source("Linear_Spline_Estimation.R")
 ```
 
