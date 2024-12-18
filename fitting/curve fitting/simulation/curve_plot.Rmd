@@ -63,21 +63,21 @@ ys[i,1,] = ys_train[i,] + rnorm(m_train,0,noises[[i]])
 
 # EBARS with gamma = 1
 ebars_1 = ebars(x_train, ys[i,1,], gamma = 1, times = 3, intercept = TRUE)
-ebars_1$mcmc(burns=1000,steps=1000)
+ebars_1$mcmc(burns=2000,steps=2000)
 ys[i,2,] = ebars_1$predict(x_train)
 
 # EBARS with gamma = 0.5
 ebars_2 = ebars(x_train, ys[i,1,], gamma = 0.5, times = 1, intercept = TRUE)
-ebars_2$mcmc(burns=1000,steps=1000)
+ebars_2$mcmc(burns=2000,steps=2000)
 ys[i,3,] = ebars_2$predict(x_train)
 
 # EBARS with gamma = 0
 ebars_3 = ebars(x_train, ys[i,1,], gamma = 0, times = 0.5, intercept = TRUE)
-ebars_3$mcmc(burns=1000,steps=1000)
+ebars_3$mcmc(burns=2000,steps=2000)
 ys[i,4,] = ebars_3$predict(x_train)
 
 # BARS
-bars_conf = BARS(x_train,ys[i,1,], burns_in = 1000, effective_length = 1000)
+bars_conf = BARS(x_train,ys[i,1,], burns_in = 2000, effective_length = 2000)
 ys[i,5,] = bars_fit(x_train, bars_conf)
 
 # Smooth spline
@@ -87,7 +87,7 @@ ys[i,6,] = predict(splinesmooth,x_train)$y
 ```
 
 ```{r}
-pdf(file = file.path("plots", "curve_regression.pdf"))
+pdf(file = file.path("../figures", "curve_fitting.pdf"))
 par(mfrow=c(4,6))
 par(mar=c(0,0,0,0), oma=c(0,0,2,0))
 for(i in c(1:4)) {

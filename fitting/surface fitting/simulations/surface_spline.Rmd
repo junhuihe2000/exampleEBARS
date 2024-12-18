@@ -12,8 +12,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r,include=FALSE}
 library(EBARS)
 library(plot3D)
-library(fields)
-source("bars_surface.r")
 ```
 
 + Function
@@ -96,27 +94,3 @@ mean(sort((y_binebars-y_new)^2)[round(p*m_test):((1-p)*m_test)])
 ```{r}
 contour(x=grid,y=grid,z=outer(grid,grid,function(x,y) {return(my_binebars$predict(cbind(x,y)))}))
 ```
-
-```{r}
-# run surface BARS
-my_binbars = BinBARS(x_train[,1],x_train[,2],y_obs,burns=500,effes=500,intercepts=c(T,T))
-y_binbars = binbars_fit(x_new[,1],x_new[,2],my_binbars)
-mean(sort((y_binbars-y_new)^2)[round(p*m_test):((1-p)*m_test)])
-```
-
-```{r}
-contour(x=grid,y=grid,z=outer(grid,grid,function(x,y) {return(binbars_fit(x,y,my_binbars))}))
-```
-
-```{r}
-# thin plate spline
-model_tps = Tps(x_train,y_obs,m=2)
-y_tps = predict(model_tps,x_new)
-mean(sort((y_tps-y_new)^2)[round(p*m_test):((1-p)*m_test)])
-```
-
-```{r}
-contour(x=grid,y=grid,z=outer(grid,grid,function(x,y) {return(predict(model_tps,cbind(x,y)))}))
-```
-
-

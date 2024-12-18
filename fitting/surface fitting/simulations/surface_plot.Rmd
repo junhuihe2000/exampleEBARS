@@ -11,9 +11,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r,include=FALSE}
 library(EBARS)
+library(mgcv)
 library(plot3D)
-library(fields)
-source("bars_surface.r")
+# library(fields)
+# source("bars_surface.r")
 ```
 
 + Function
@@ -52,7 +53,7 @@ noises = c(1,1.5,2,2)
 + Plot True Surface
 
 ```{r}
-pdf(file=file.path("plots","surface_truth.pdf"))
+pdf(file=file.path("../figures","surface_truth.pdf"))
 par(mfrow=c(1,4))
 par(mar=c(0,1,0,1))
 grid = seq(0,1,by=0.02)
@@ -81,7 +82,7 @@ m_train = 1000
 x_train = cbind(c(0,runif(m_train-2,0,1),1),c(0,runif(m_train-2,0,1),1))
 grid = seq(0,1,by=0.01)
 
-pdf(file = file.path("plots","surface_regression.pdf"))
+pdf(file = file.path("../figures","surface_fitting.pdf"))
 par(mfrow=c(4,6))
 par(mar=c(0,0,0,0))
 for(i in 1:4) {
@@ -101,13 +102,15 @@ for(i in 1:4) {
   binebars_3 = binebars(x_train, y_obs,gamma=0,times_1=0.5,times_2=0.5,intercept_1=T,intercept_2=T)
   binebars_3$mcmc(burns=500,steps=500)
   contour(x=grid,y=grid,z=outer(grid,grid,function(x,y) {return(binebars_3$predict(cbind(x,y)))}),axes = FALSE,frame.plot =TRUE)
-  # BARS
-  binbars = BinBARS(x_train[,1],x_train[,2],y_obs,burns=500,effes=500,intercepts=c(T,T))
-  contour(x=grid,y=grid,z=outer(grid,grid,function(x,y) {return(binbars_fit(x,y,binbars))}),axes = FALSE,frame.plot =TRUE)
   # Thin Plate Spline
-  model_tps = Tps(x_train,y_obs,m=2) 
-  contour(x=grid,y=grid,z=outer(grid,grid,function(x,y) {return(predict(model_tps,cbind(x,y)))}),axes = FALSE,frame.plot =TRUE)
+  x_train_df = data.frame(x1 = x_train[,1], x2 = x_train[,2])
+  model_tps = gam(y_obs~s(x1, x2, k = 200), data = x_train_df)
+  contour(x=grid,y=grid,z=outer(grid,grid,function(x,y) {return(predict(model_tps,data.frame(x1=x,x2=y)))}),axes = FALSE,frame.plot =TRUE)
+  # Tensor Product Spline
+  model_tep = gam(y_obs~te(x1, x2, k = 15), data = x_train_df)
+  contour(x=grid,y=grid,z=outer(grid,grid,function(x,y) {return(predict(model_tep,data.frame(x1=x,x2=y)))}),axes = FALSE,frame.plot =TRUE)
 }
+  
 dev.off()
 time.end = Sys.time()
 print(time.end-time.start)
