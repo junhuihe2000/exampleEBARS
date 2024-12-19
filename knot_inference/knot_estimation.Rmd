@@ -166,7 +166,7 @@ nodes_3 = sapply(ebars_3$samples(), function(xi) {return(xi)})
 ```{r, include=FALSE}
 time.start = Sys.time()
 set.seed(1234)
-m_train = 200
+m_train = 500
 for(n in 1:n_exp) {
   for(i in 1:3) {
   print(paste0("The ",n,"-th experiment\n"))
@@ -187,7 +187,6 @@ for(n in 1:n_exp) {
   }
   error_array[1,idx,n] = xi-xi_ebars
   
-  if(FALSE) {
   # Linear Spline Estimation
   init_lse = quantile(x_train, probs=seq(0,1,length.out=(k+2))[2:(k+1)])
   xi_lse = sort(LSE(x_train,y_obs,init_lse))
@@ -200,11 +199,11 @@ for(n in 1:n_exp) {
   xi_seg = sort(fit.seg$psi[,2])
   error_array[3,idx,n] = xi-xi_seg
   }
-  }
 }
 time.end = Sys.time()
 print(time.end-time.start)
 # Time difference of 1.018486 hours
+# Time difference of 2.022524 hours
 ```
 
 + Summary Data
